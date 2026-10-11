@@ -1,5 +1,6 @@
 [MAIN]
 py-version=3.10
+init-hook=import sys; sys.path.insert(0, ".")
 
 [FORMAT]
 max-line-length=100
