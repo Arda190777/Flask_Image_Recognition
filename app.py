@@ -1,32 +1,38 @@
-# Importing required libs
-from flask import Flask, render_template, request
-from model import preprocess_img, predict_result
+"""Flask application for hand-sign digit recognition."""
 
-# Instantiating flask app
+from flask import Flask, render_template, request
+
+from model import predict_result, preprocess_img
+
+
 app = Flask(__name__)
 
 
-# Home route
 @app.route("/")
 def main():
+    """Render the image-upload home page."""
     return render_template("index.html")
 
 
-# Prediction route
-@app.route('/prediction', methods=['POST'])
+@app.route("/prediction", methods=["POST"])
 def predict_image_file():
+    """Process an uploaded image and display the predicted digit."""
     try:
-        if request.method == 'POST':
-            img = preprocess_img(request.files['file'].stream)
-            pred = predict_result(img)
-            return render_template("result.html", predictions=str(pred))
+        uploaded_file = request.files["file"]
+        processed_image = preprocess_img(uploaded_file.stream)
+        prediction = predict_result(processed_image)
 
-    except Exception as error:
+        return render_template(
+            "result.html",
+            predictions=str(prediction),
+        )
+
+    except (KeyError, OSError, ValueError) as error:
         app.logger.exception("Prediction failed: %s", error)
         message = "File cannot be processed."
         return render_template("result.html", err=message), 400
 
 
-# Driver code
 if __name__ == "__main__":
     app.run(port=9000, debug=True)
+    

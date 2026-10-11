@@ -1,4 +1,5 @@
-# Importing required libs
+"""Image preprocessing and prediction utilities."""
+
 from pathlib import Path
 
 from keras.models import load_model
@@ -6,21 +7,21 @@ from keras.utils import img_to_array
 import numpy as np
 from PIL import Image
 
-# Build a portable path to the model stored in the project directory.
+
 MODEL_PATH = Path(__file__).resolve().parent / "digit_model.h5"
-
-# Loading model
-model = load_model(str(MODEL_PATH))
-
-def preprocess_img(img_path):
-    op_img = Image.open(img_path).convert("RGB")
-    img_resize = op_img.resize((224, 224))
-    img2arr = img_to_array(img_resize) / 255.0
-    img_reshape = img2arr.reshape(1, 224, 224, 3)
-    return img_reshape
+MODEL = load_model(str(MODEL_PATH))
 
 
-# Predicting function
-def predict_result(predict):
-    pred = model.predict(predict)
-    return np.argmax(pred[0], axis=-1)
+def preprocess_img(image_source):
+    """Convert an uploaded image into the format expected by the model."""
+    with Image.open(image_source) as original_image:
+        resized_image = original_image.convert("RGB").resize((224, 224))
+        image_array = img_to_array(resized_image) / 255.0
+
+    return np.expand_dims(image_array, axis=0)
+
+
+def predict_result(processed_image):
+    """Return the digit class with the highest prediction score."""
+    prediction = MODEL.predict(processed_image, verbose=0)
+    return np.argmax(prediction[0], axis=-1)
