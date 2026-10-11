@@ -1,6 +1,7 @@
 """Tests for the Flask application routes."""
 
 from io import BytesIO
+from unittest.mock import Mock
 
 import app as app_module
 
@@ -53,6 +54,22 @@ def test_invalid_file_returns_error(client):
     response = client.post(
         "/prediction",
         data={"file": (BytesIO(b"not-an-image"), "invalid.txt")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    assert b"File cannot be processed." in response.data
+
+def test_blank_filename_returns_error(client, monkeypatch):
+    """An upload without a filename should return an error."""
+    monkeypatch.setattr(
+        app_module, "preprocess_img", Mock(return_value="processed-image")
+    )
+    monkeypatch.setattr(app_module, "predict_result", Mock(return_value=4))
+
+    response = client.post(
+        "/prediction",
+        data={"file": (BytesIO(b"image-data"), "")},
         content_type="multipart/form-data",
     )
 
