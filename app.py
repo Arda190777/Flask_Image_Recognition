@@ -19,6 +19,8 @@ def predict_image_file():
     """Process an uploaded image and display the predicted digit."""
     try:
         uploaded_file = request.files["file"]
+        if not uploaded_file.filename:
+            raise ValueError("No file was selected.")
         processed_image = preprocess_img(uploaded_file.stream)
         prediction = predict_result(processed_image)
 
