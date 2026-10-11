@@ -21,9 +21,10 @@ def predict_image_file():
             pred = predict_result(img)
             return render_template("result.html", predictions=str(pred))
 
-    except:
-        error = "File cannot be processed."
-        return render_template("result.html", err=error)
+    except Exception as error:
+        app.logger.exception("Prediction failed: %s", error)
+        message = "File cannot be processed."
+        return render_template("result.html", err=message), 400
 
 
 # Driver code
